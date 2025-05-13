@@ -4,6 +4,7 @@ let turn = "X";
 let moves = [];
 let players = { X: "", O: "" };
 let gameEnded = false;
+let allGames = []; // Lưu nhiều ván đấu
 
 function startGame() {
   players.X = document.getElementById("playerX").value || "Player X";
@@ -74,20 +75,30 @@ function saveGame(winner) {
   const data = {
     players,
     winner,
-    moves
+    moves,
+    timestamp: new Date().toISOString()
   };
-  localStorage.setItem("last_game", JSON.stringify(data));
+
+  // Lưu vào danh sách nhiều ván
+  allGames.push(data);
+
+  // Reset board để chơi tiếp nếu muốn
+  setTimeout(() => {
+    if (confirm("Play another game?")) {
+      createBoard();
+    }
+  }, 300);
 }
 
 function exportData() {
-  const data = localStorage.getItem("last_game");
-  if (!data) {
-    alert("No game data found!");
+  if (allGames.length === 0) {
+    alert("No game data to export!");
     return;
   }
-  const blob = new Blob([data], { type: "application/json" });
+
+  const blob = new Blob([JSON.stringify(allGames, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "game_data.json";
+  link.download = "data.json";
   link.click();
 }
