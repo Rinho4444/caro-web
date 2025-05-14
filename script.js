@@ -25,7 +25,7 @@ function createBoard() {
   moves = [];
   turn = "X";
   gameEnded = false;
-  
+
   const boardDiv = document.getElementById("board");
   boardDiv.innerHTML = "";
 
@@ -119,6 +119,11 @@ function undoMove() {
 
   // Trả lại lượt cho người chơi vừa đi
   turn = lastTurn;
+
+  // Nếu đã undo và không có nước đi nữa thì ẩn nút Undo
+  if (moves.length === 0) {
+    document.getElementById("undoBtn").style.display = "none"; // Ẩn nút Undo nếu không còn nước đi
+  }
 }
 
 function exportData() {
