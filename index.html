@@ -7,16 +7,22 @@
 </head>
 <body>
   <h1>🎯 Caro 19x19</h1>
+
+  <!-- Form nhập tên người chơi -->
   <div id="player-form">
     <input type="text" id="playerX" placeholder="Player X Name" />
     <input type="text" id="playerO" placeholder="Player O Name" />
     <button onclick="startGame()">Start Game</button>
   </div>
 
+  <!-- Thông tin game -->
   <div id="game-info"></div>
+
+  <!-- Bàn cờ -->
   <div id="board"></div>
+
+  <!-- Nút Undo và Export Data -->
   <button id="undoBtn" style="display: none;" onclick="undoMove()">Undo</button>
-  
   <button onclick="exportData()">💾 Export Data</button>
 
   <script src="script.js"></script>
