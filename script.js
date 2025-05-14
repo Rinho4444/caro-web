@@ -71,6 +71,21 @@ function checkWin(r, c) {
   return false;
 }
 
+function undoMove() {
+  if (moves.length === 0 || gameEnded) return;
+
+  const lastMove = moves.pop();
+  const { row, col, turn: lastTurn } = lastMove;
+
+  // Xóa trên bàn cờ
+  board[row][col] = "";
+  const cellIndex = row * SIZE + col;
+  document.getElementsByClassName("cell")[cellIndex].innerText = "";
+
+  // Trả lượt lại cho người vừa đi
+  turn = lastTurn;
+}
+
 function saveGame(winner) {
   const data = {
     players,
