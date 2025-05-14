@@ -12,9 +12,11 @@
     <input type="text" id="playerO" placeholder="Player O Name" />
     <button onclick="startGame()">Start Game</button>
   </div>
-  <button onclick="undoMove()">Undo</button>
+
   <div id="game-info"></div>
   <div id="board"></div>
+  <button id="undoBtn" style="display: none;" onclick="undoMove()">Undo</button>
+  
   <button onclick="exportData()">💾 Export Data</button>
 
   <script src="script.js"></script>
