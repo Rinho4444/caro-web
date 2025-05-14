@@ -11,6 +11,9 @@ function startGame() {
   players.O = document.getElementById("playerO").value || "Player O";
   document.getElementById("game-info").innerText = `${players.X} (X) vs ${players.O} (O) - X starts`;
   createBoard();
+
+  // Hiển thị nút Undo khi bắt đầu game
+  document.getElementById("undoBtn").style.display = "inline-block"; // Hiện nút Undo
 }
 
 function createBoard() {
@@ -71,21 +74,6 @@ function checkWin(r, c) {
   return false;
 }
 
-function undoMove() {
-  if (moves.length === 0 || gameEnded) return;
-
-  const lastMove = moves.pop();
-  const { row, col, turn: lastTurn } = lastMove;
-
-  // Xóa trên bàn cờ
-  board[row][col] = "";
-  const cellIndex = row * SIZE + col;
-  document.getElementsByClassName("cell")[cellIndex].innerText = "";
-
-  // Trả lượt lại cho người vừa đi
-  turn = lastTurn;
-}
-
 function saveGame(winner) {
   const data = {
     players,
@@ -94,15 +82,26 @@ function saveGame(winner) {
     timestamp: new Date().toISOString()
   };
 
-  // Lưu vào danh sách nhiều ván
   allGames.push(data);
 
-  // Reset board để chơi tiếp nếu muốn
   setTimeout(() => {
     if (confirm("Play another game?")) {
       createBoard();
     }
   }, 300);
+}
+
+function undoMove() {
+  if (moves.length === 0 || gameEnded) return;
+
+  const lastMove = moves.pop();
+  const { row, col, turn: lastTurn } = lastMove;
+
+  board[row][col] = "";
+  const cellIndex = row * SIZE + col;
+  document.getElementsByClassName("cell")[cellIndex].innerText = "";
+
+  turn = lastTurn;
 }
 
 function exportData() {
