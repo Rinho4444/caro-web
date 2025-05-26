@@ -55,7 +55,9 @@ function handleClick(e) {
     gameEnded = true;
     askReplay();
   } else {
+    // Đổi lượt và cập nhật thông tin hiển thị
     turn = turn === "X" ? "O" : "X";
+    document.getElementById("game-info").innerText = `${players[turn]} (${turn})'s turn`;
   }
 }
 
