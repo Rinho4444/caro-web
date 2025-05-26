@@ -1,29 +1,28 @@
-let SIZE = 19;
+const SIZE = 19;
 let board = [];
 let turn = "X";
 let moves = [];
 let players = { X: "", O: "" };
 let gameEnded = false;
-let gameLogs = []; // Dùng cho training AI
-let currentGameId = ""; // Ghi thời gian game bắt đầu
+let allGames = [];
+let gameLogs = [];
+let currentGameId = null;
 
 function startGame() {
   players.X = document.getElementById("playerX").value || "Player X";
   players.O = document.getElementById("playerO").value || "Player O";
-  document.getElementById("game-info").innerText = `${players.X} (X) vs ${players.O} (O) - X starts`;
-
-  currentGameId = new Date().toISOString(); // Gán game_id theo thời gian
+  turn = "X";
+  gameEnded = false;
+  currentGameId = Date.now();
+  gameLogs = [];
+  document.getElementById("game-info").innerText = `${players[turn]} (${turn})'s turn`;
   createBoard();
-
   document.getElementById("undoBtn").style.display = "inline-block";
 }
 
 function createBoard() {
   board = Array.from({ length: SIZE }, () => Array(SIZE).fill(""));
   moves = [];
-  turn = "X";
-  gameEnded = false;
-
   const boardDiv = document.getElementById("board");
   boardDiv.innerHTML = "";
 
@@ -37,18 +36,16 @@ function createBoard() {
   }
 }
 
-function deepCopyBoard(board) {
-  return board.map(row => [...row]);
-}
-
 function handleClick(e) {
   if (gameEnded) return;
+
   const row = parseInt(e.target.dataset.row);
   const col = parseInt(e.target.dataset.col);
   if (board[row][col] !== "") return;
 
-  // Ghi log trước khi đánh
   const boardBeforeMove = deepCopyBoard(board);
+
+  // Lưu move vào log trước khi thay đổi gì
   gameLogs.push({
     game_id: currentGameId,
     player: turn,
@@ -56,37 +53,95 @@ function handleClick(e) {
     move: { row, col }
   });
 
+  // Ghi vào bảng
   board[row][col] = turn;
   e.target.innerText = turn;
-  moves.push({ turn, row, col });
+
+  // 🛠 FIX BUG: đảm bảo turn được lưu chính xác
+  moves.push({ turn: turn, row, col });
 
   if (checkWin(row, col)) {
     alert(`${players[turn]} (${turn}) wins!`);
     gameEnded = true;
     saveGame(turn);
-  } else {
-    turn = turn === "X" ? "O" : "X";
+    return;
   }
+
+  // Đổi lượt
+  turn = turn === "X" ? "O" : "X";
+  document.getElementById("game-info").innerText = `${players[turn]} (${turn})'s turn`;
+}
+
+function checkWin(r, c) {
+  const dr = [1, 0, 1, 1];
+  const dc = [0, 1, 1, -1];
+
+  for (let d = 0; d < 4; d++) {
+    let count = 1;
+    for (let i = 1; i < 5; i++) {
+      const nr = r + dr[d] * i, nc = c + dc[d] * i;
+      if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE || board[nr][nc] !== turn) break;
+      count++;
+    }
+    for (let i = 1; i < 5; i++) {
+      const nr = r - dr[d] * i, nc = c - dc[d] * i;
+      if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE || board[nr][nc] !== turn) break;
+      count++;
+    }
+    if (count >= 5) return true;
+  }
+  return false;
 }
 
 function saveGame(winner) {
-  // Không cần lưu allGames nữa, chỉ export gameLogs
+  const data = {
+    players,
+    winner,
+    moves,
+    timestamp: new Date().toISOString(),
+    game_id: currentGameId
+  };
+
+  allGames.push(data);
+
   setTimeout(() => {
     if (confirm("Play another game?")) {
-      createBoard();
+      startGame();
     }
   }, 300);
 }
 
+function undoMove() {
+  if (moves.length === 0 || gameEnded) return;
+
+  const lastMove = moves.pop();
+  const { row, col, turn: lastTurn } = lastMove;
+  board[row][col] = "";
+  const cellIndex = row * SIZE + col;
+  document.getElementsByClassName("cell")[cellIndex].innerText = "";
+  turn = lastTurn;
+  document.getElementById("game-info").innerText = `${players[turn]} (${turn})'s turn`;
+
+  gameLogs.pop();
+
+  if (moves.length === 0) {
+    document.getElementById("undoBtn").style.display = "none";
+  }
+}
+
 function exportData() {
   if (gameLogs.length === 0) {
-    alert("No data to export!");
+    alert("No game data to export!");
     return;
   }
 
   const blob = new Blob([JSON.stringify(gameLogs, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "gomoku_log.json";
+  link.download = "game_logs.json";
   link.click();
+}
+
+function deepCopyBoard(b) {
+  return b.map(row => row.slice());
 }
