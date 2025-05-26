@@ -10,7 +10,7 @@ let gameID = "";   // ID của ván hiện tại (timestamp)
 function startGame() {
   players.X = document.getElementById("playerX").value || "Player X";
   players.O = document.getElementById("playerO").value || "Player O";
-  document.getElementById("game-info").innerText = `${players.X} (X) vs ${players.O} (O) - X starts`;
+  document.getElementById("game-info").innerText = `${players[turn]} (${turn})'s turn`;
 
   gameID = new Date().toISOString(); // tạo ID theo thời gian
   createBoard();
@@ -124,6 +124,8 @@ function undoMove() {
 
   turn = lastTurn;
 
+  document.getElementById("game-info").innerText = `${players[turn]} (${turn})'s turn`;
+  
   allMoves.pop(); // Xóa khỏi log dữ liệu AI
 
   if (moves.length === 0) {
